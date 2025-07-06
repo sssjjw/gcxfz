@@ -64,7 +64,11 @@ function main() {
   const envFile = path.join(process.cwd(), '.env');
   if (fs.existsSync(envFile)) {
     console.log('📄 读取.env文件');
-    require('dotenv').config({ path: envFile });
+    try {
+      require('dotenv').config({ path: envFile });
+    } catch (e) {
+      console.log('  ⚠️  dotenv包未安装，跳过.env文件读取');
+    }
   } else {
     console.log('📄 未找到.env文件，使用系统环境变量');
   }

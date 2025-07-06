@@ -49,7 +49,7 @@ VITE_FIREBASE_APP_ID=1:112720952941:web:ab4e3dce42b152edba0964
 使用验证脚本检查环境变量：
 
 ```bash
-node scripts/validate-env.js
+node scripts/validate-env.cjs
 ```
 
 ## Firebase项目配置
