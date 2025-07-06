@@ -26,8 +26,8 @@ export default defineConfig({
       }
     }
   },
-  // GitHub Pages配置
-  base: process.env.NODE_ENV === 'production' ? '/gcxfz/' : '/',
+  // GitHub Pages配置 - 如果部署到根目录则移除base
+  base: '/',
   // 开发服务器配置
   server: {
     port: 5173,
