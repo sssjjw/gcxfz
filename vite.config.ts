@@ -26,8 +26,8 @@ export default defineConfig({
       }
     }
   },
-  // GitHub Pages配置 - 如果部署到根目录则移除base
-  base: '/',
+  // GitHub Pages配置 - 部署在子目录/gcxfz/下
+  base: '/gcxfz/',
   // 开发服务器配置
   server: {
     port: 5173,
