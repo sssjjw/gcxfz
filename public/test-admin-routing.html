@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员路由测试 - 哥村小饭桌</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .info {
+            color: #17a2b8;
+        }
+        .log-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 管理员路由测试页面</h1>
+    <p>此页面用于测试管理员路由跳转是否正常工作。</p>
+    
+    <div class="test-section">
+        <h3>📍 当前URL状态</h3>
+        <p><strong>完整URL:</strong> <span id="currentUrl"></span></p>
+        <p><strong>搜索参数:</strong> <span id="searchParams"></span></p>
+        <p><strong>Admin参数:</strong> <span id="adminParam"></span></p>
+        <p><strong>检测模式:</strong> <span id="detectedMode"></span></p>
+    </div>
+
+    <div class="test-section">
+        <h3>🔗 路由测试链接</h3>
+        <p>点击以下链接测试不同的管理员页面路由：</p>
+        
+        <a href="?admin=login" class="test-button">管理员登录</a>
+        <a href="?admin=dashboard" class="test-button">控制面板</a>
+        <a href="?admin=orders" class="test-button">订单管理</a>
+        <a href="?admin=menu" class="test-button">菜品管理</a>
+        <a href="?admin=settings" class="test-button">系统设置</a>
+        <a href="/" class="test-button" style="background: #6c757d;">返回首页</a>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 实时检测</h3>
+        <p>URL变化时会自动更新以下信息：</p>
+        <div id="liveStatus"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 测试结果</h3>
+        <div id="testResults"></div>
+        <button onclick="runTests()" class="test-button" style="background: #28a745;">运行自动测试</button>
+    </div>
+
+    <div class="test-section">
+        <h3>📋 控制台日志</h3>
+        <div class="log-output" id="consoleLog"></div>
+        <button onclick="clearLog()" class="test-button" style="background: #6c757d;">清空日志</button>
+    </div>
+
+    <script>
+        // 日志输出
+        const logElement = document.getElementById('consoleLog');
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            logElement.innerHTML = '';
+        }
+
+        // 更新当前状态
+        function updateStatus() {
+            const url = window.location.href;
+            const search = window.location.search;
+            const urlParams = new URLSearchParams(search);
+            const adminParam = urlParams.get('admin');
+            const hasAdmin = urlParams.has('admin');
+            
+            document.getElementById('currentUrl').textContent = url;
+            document.getElementById('searchParams').textContent = search || '(无)';
+            document.getElementById('adminParam').textContent = adminParam || '(无)';
+            document.getElementById('detectedMode').innerHTML = hasAdmin ? 
+                '<span class="success">管理员模式</span>' : 
+                '<span class="info">客户模式</span>';
+
+            // 实时状态
+            const statusElement = document.getElementById('liveStatus');
+            statusElement.innerHTML = `
+                <p><strong>URL监听结果:</strong></p>
+                <ul>
+                    <li>showAdminMode: ${hasAdmin ? '✅ true' : '❌ false'}</li>
+                    <li>admin参数值: ${adminParam || 'null'}</li>
+                    <li>预期渲染: ${hasAdmin ? '管理员界面' : '客户端界面'}</li>
+                </ul>
+            `;
+
+            log(`🔍 URL检测 - hasAdmin: ${hasAdmin}, adminValue: ${adminParam}, showAdminMode: ${hasAdmin}`);
+        }
+
+        // 运行自动测试
+        function runTests() {
+            const resultsElement = document.getElementById('testResults');
+            resultsElement.innerHTML = '<p>🚀 开始自动测试...</p>';
+            
+            const tests = [
+                { url: '?admin=login', expected: 'admin', description: '管理员登录页面' },
+                { url: '?admin=dashboard', expected: 'admin', description: '管理员控制面板' },
+                { url: '?admin=menu', expected: 'admin', description: '菜品管理页面' },
+                { url: '/', expected: 'customer', description: '客户端首页' },
+                { url: '?test=abc', expected: 'customer', description: '无效参数测试' }
+            ];
+
+            let results = '<h4>测试结果:</h4><ul>';
+            
+            tests.forEach((test, index) => {
+                const urlParams = new URLSearchParams(test.url.split('?')[1] || '');
+                const hasAdmin = urlParams.has('admin');
+                const adminValue = urlParams.get('admin');
+                const detected = hasAdmin ? 'admin' : 'customer';
+                const passed = detected === test.expected;
+                
+                results += `<li>
+                    ${passed ? '✅' : '❌'} ${test.description}
+                    <br><small>URL: ${test.url} | 检测: ${detected} | 期望: ${test.expected}</small>
+                </li>`;
+                
+                log(`🧪 测试 ${index + 1}: ${test.description} - ${passed ? '通过' : '失败'}`);
+            });
+            
+            results += '</ul>';
+            resultsElement.innerHTML = results;
+        }
+
+        // 监听URL变化
+        window.addEventListener('popstate', updateStatus);
+        
+        // 初始化
+        updateStatus();
+        log('🎯 管理员路由测试页面已加载');
+        log('📱 测试环境: ' + navigator.userAgent);
+        
+        // 页面加载完成后的检查
+        setTimeout(() => {
+            log('🔍 页面加载完成，开始检查路由状态...');
+            updateStatus();
+            
+            // 检查是否有Firebase错误
+            setTimeout(() => {
+                const hasFirebaseErrors = window.performance && 
+                    window.performance.getEntriesByType('navigation').length > 0;
+                log(`🔥 Firebase状态检查: ${hasFirebaseErrors ? '可能有错误' : '正常'}`);
+            }, 2000);
+        }, 1000);
+    </script>
+</body>
+</html> 
