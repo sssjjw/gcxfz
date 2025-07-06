@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Save, Plus, Trash, Database, AlertTriangle, RotateCcw } from 'lucide-react';
 import AnnouncementEditor from '../components/AnnouncementEditor';
 import { AnnouncementData, defaultAnnouncementData } from '../../customer/components/Announcement';
+import { settingsService } from '../../../firebase/services';
 
 // 定义餐厅信息和优惠活动的接口
 interface RestaurantInfo {
@@ -17,21 +18,64 @@ interface Discount {
   description: string;
 }
 
-// 加载数据函数
-const loadDataFromStorage = <T,>(key: string, defaultValue: T): T => {
+// 从Firebase和localStorage加载数据函数
+const loadDataFromStorage = async <T,>(key: string, defaultValue: T): Promise<T> => {
   try {
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : defaultValue;
-  } catch (error) {
-    console.error(`加载${key}数据失败:`, error);
+    // 优先从Firebase加载数据
+    console.log(`🔄 正在从Firebase加载${key}数据...`);
+    const firebaseData = await settingsService.getSetting(key);
+    
+    if (firebaseData !== null && firebaseData !== undefined) {
+      console.log(`✅ 从Firebase加载了${key}数据`);
+      return firebaseData;
+    }
+    
+    // Firebase没有数据，尝试从localStorage加载
+    console.log(`⚠️ Firebase没有${key}数据，尝试从localStorage加载...`);
+    const localData = localStorage.getItem(key);
+    
+    if (localData) {
+      const parsedData = JSON.parse(localData);
+      
+      // 如果localStorage有数据但Firebase没有，迁移数据到Firebase
+      console.log(`🚀 正在迁移${key}数据到Firebase...`);
+      try {
+        await settingsService.setSetting(key, parsedData);
+        console.log(`✅ ${key}数据迁移到Firebase成功`);
+      } catch (error) {
+        console.error(`❌ ${key}数据迁移失败:`, error);
+      }
+      
+      return parsedData;
+    }
+    
     return defaultValue;
+  } catch (error) {
+    console.error(`❌ 加载${key}数据失败:`, error);
+    // 如果Firebase连接失败，回退到localStorage
+    try {
+      const localData = localStorage.getItem(key);
+      return localData ? JSON.parse(localData) : defaultValue;
+    } catch (localError) {
+      console.error(`❌ 从localStorage加载${key}数据也失败:`, localError);
+      return defaultValue;
+    }
   }
 };
 
-// 保存数据函数
-const saveDataToStorage = <T,>(key: string, data: T) => {
+// 保存数据函数到localStorage和Firebase
+const saveDataToStorage = async <T,>(key: string, data: T) => {
   try {
+    // 保存到localStorage（作为缓存）
     localStorage.setItem(key, JSON.stringify(data));
+    
+    // 保存到Firebase（主要存储）
+    try {
+      await settingsService.setSetting(key, data);
+      console.log(`✅ ${key}数据已保存到Firebase`);
+    } catch (firebaseError) {
+      console.error(`❌ 保存${key}数据到Firebase失败:`, firebaseError);
+    }
     
     // 发送自定义事件通知其他组件
     const updateEvent = new CustomEvent(`${key}Update`, { detail: data });
@@ -42,25 +86,19 @@ const saveDataToStorage = <T,>(key: string, data: T) => {
 };
 
 const SystemSettings: React.FC = () => {
-  // 从localStorage加载初始数据
-  const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo>(() => 
-    loadDataFromStorage('restaurantInfo', {
-      name: '美食之家',
-      logo: 'https://images.pexels.com/photos/6287525/pexels-photo-6287525.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
-    })
-  );
+  // 初始化为默认值，数据将在useEffect中异步加载
+  const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo>({
+    name: '美食之家',
+    logo: 'https://images.pexels.com/photos/6287525/pexels-photo-6287525.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+  });
   
-  const [announcementData, setAnnouncementData] = useState<AnnouncementData>(() =>
-    loadDataFromStorage('announcementData', defaultAnnouncementData)
-  );
+  const [announcementData, setAnnouncementData] = useState<AnnouncementData>(defaultAnnouncementData);
   
-  const [discounts, setDiscounts] = useState<Discount[]>(() =>
-    loadDataFromStorage('discounts', [
+  const [discounts, setDiscounts] = useState<Discount[]>([
     { id: '1', type: 'amount', threshold: 100, value: 10, description: '满100减10元' },
     { id: '2', type: 'amount', threshold: 200, value: 20, description: '满200减20元' },
     { id: '3', type: 'percentage', threshold: 300, value: 15, description: '满300享85折' },
-    ])
-  );
+  ]);
   
   const [newDiscount, setNewDiscount] = useState<Omit<Discount, 'id' | 'description'>>({
     type: 'amount',
@@ -71,9 +109,43 @@ const SystemSettings: React.FC = () => {
   const [showDiscountForm, setShowDiscountForm] = useState(false);
   const [activeTab, setActiveTab] = useState('basic'); // 'basic', 'announcement', 'discount', 'dataManagement'
   
-  // 当数据变化时保存到localStorage
+  // 异步加载所有设置数据
   useEffect(() => {
-    saveDataToStorage('restaurantInfo', restaurantInfo);
+    const loadAllSettings = async () => {
+      try {
+        // 并行加载所有设置数据
+        const [loadedRestaurantInfo, loadedAnnouncementData, loadedDiscounts] = await Promise.all([
+          loadDataFromStorage('restaurantInfo', {
+            name: '美食之家',
+            logo: 'https://images.pexels.com/photos/6287525/pexels-photo-6287525.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+          }),
+          loadDataFromStorage('announcementData', defaultAnnouncementData),
+          loadDataFromStorage('discounts', [
+            { id: '1', type: 'amount' as const, threshold: 100, value: 10, description: '满100减10元' },
+            { id: '2', type: 'amount' as const, threshold: 200, value: 20, description: '满200减20元' },
+            { id: '3', type: 'percentage' as const, threshold: 300, value: 15, description: '满300享85折' },
+          ])
+        ]);
+        
+        setRestaurantInfo(loadedRestaurantInfo);
+        setAnnouncementData(loadedAnnouncementData);
+        setDiscounts(loadedDiscounts);
+        
+        console.log('✅ 所有设置数据加载完成');
+      } catch (error) {
+        console.error('❌ 加载设置数据失败:', error);
+      }
+    };
+    
+    loadAllSettings();
+  }, []);
+  
+  // 当数据变化时保存到localStorage和Firebase
+  useEffect(() => {
+    // 避免初始化时就保存默认数据
+    if (restaurantInfo.name !== '美食之家') {
+      saveDataToStorage('restaurantInfo', restaurantInfo);
+    }
   }, [restaurantInfo]);
   
   useEffect(() => {
@@ -119,13 +191,13 @@ const SystemSettings: React.FC = () => {
   };
   
   // Handle announcement update
-  const handleSaveAnnouncement = (data: AnnouncementData) => {
+  const handleSaveAnnouncement = async (data: AnnouncementData) => {
     try {
       // 更新状态
       setAnnouncementData(data);
       
-      // 保存到本地存储
-      localStorage.setItem('announcementData', JSON.stringify(data));
+      // 使用新的保存函数（同时保存到localStorage和Firebase）
+      await saveDataToStorage('announcementData', data);
       
       // 清除可能阻止弹窗显示的标记
       localStorage.removeItem('hasShownAnnouncementModal');
@@ -146,7 +218,7 @@ const SystemSettings: React.FC = () => {
       sessionStorage.setItem('announcement_updated_time', String(new Date().getTime()));
       
       // 使用更醒目的提示
-      alert('公告信息已更新！所有用户将在刷新页面后看到新内容。');
+      alert('公告信息已更新并保存到云端！所有用户将在刷新页面后看到新内容。');
     } catch (error) {
       console.error('保存公告数据失败:', error);
       alert('保存失败，请重试');
