@@ -33,17 +33,7 @@ const MenuList: React.FC<MenuListProps> = ({ menuItems, categories, categoryRefs
     return colors[index % colors.length];
   };
 
-  // 获取分类图标
-  const getCategoryIcon = (categoryId: string) => {
-    // 根据分类ID返回合适的图标类名
-    switch (categoryId) {
-      case '1': return 'text-orange-500';
-      case '2': return 'text-green-500';
-      case '3': return 'text-blue-500';
-      case '4': return 'text-purple-500';
-      default: return 'text-gray-500';
-    }
-  };
+
 
   return (
     <div className="pb-4">

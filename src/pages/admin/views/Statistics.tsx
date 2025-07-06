@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Download, ChevronDown, BarChart, LineChart, RotateCcw, Database, AlertTriangle, Trash, Users } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Download, ChevronDown, BarChart, RotateCcw, Database, AlertTriangle, Trash, Users } from 'lucide-react';
 import { useOrder } from '../../../contexts/OrderContext';
 
 const Statistics: React.FC = () => {
@@ -84,7 +84,7 @@ const Statistics: React.FC = () => {
     });
 
     const topSellingItems = Array.from(itemStats.entries())
-      .map(([key, stats]) => ({ 
+      .map(([, stats]) => ({ 
         name: stats.displayName,
         baseItemName: stats.baseItemName,
         variant: stats.variant,

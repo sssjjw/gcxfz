@@ -91,8 +91,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
   const triggerFlyAnimation = () => {
     if (!addButtonRef.current || !itemImageRef.current) return;
     
-    // 获取图片和按钮位置
-    const buttonRect = addButtonRef.current.getBoundingClientRect();
+    // 获取图片位置
     const imageRect = itemImageRef.current.getBoundingClientRect();
     
     // 使用图片中心作为动画起点，这样更加自然

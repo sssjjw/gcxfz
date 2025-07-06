@@ -71,7 +71,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ order, onClose })
           <h4 className="text-base font-semibold text-gray-900">订单详情</h4>
           
           <div className="mt-4 space-y-4">
-            {order.items.map((item, index) => {
+            {order.items.map((item) => {
               // 使用预计算价格或计算实际价格
               let unitPrice = item.calculatedPrice !== undefined ? item.calculatedPrice : item.menuItem.price;
               

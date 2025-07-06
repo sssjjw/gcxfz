@@ -18,9 +18,7 @@ const AdminDashboard: React.FC = () => {
     return <Navigate to="/admin/login" replace />;
   }
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+
 
   return (
     <div className="flex h-screen bg-gray-50">

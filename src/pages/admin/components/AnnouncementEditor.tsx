@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash, Utensils, Star } from 'lucide-react';
+import { Plus, Trash, Star } from 'lucide-react';
 import { AnnouncementData, defaultAnnouncementData } from '../../customer/components/Announcement';
 
 interface AnnouncementEditorProps {
@@ -363,7 +363,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
 
   // 添加一个包装处理函数，确保同步
   const handleSpecialDeadlineChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const [year, month, day] = e.target.value.split('-').map(num => parseInt(num));
+    const [, month, day] = e.target.value.split('-').map(num => parseInt(num));
     const formattedDate = `${month}.${day}`;
     // 更新特殊截单时间，整合日期部分
     updateSpecialDeadlineComplete(specialDeadlinePrefix, formattedDate);

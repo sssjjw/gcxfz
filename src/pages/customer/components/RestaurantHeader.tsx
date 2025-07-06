@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Info, ChefHat, Sparkles, Bell, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChefHat, Sparkles, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import Announcement, { defaultAnnouncementData, AnnouncementData } from './Announcement';
 import { loadDataFromStorage } from '../../../utils/storage';
 

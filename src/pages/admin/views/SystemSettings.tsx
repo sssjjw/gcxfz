@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Edit, Plus, Trash, Database, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Save, Plus, Trash, Database, AlertTriangle, RotateCcw } from 'lucide-react';
 import AnnouncementEditor from '../components/AnnouncementEditor';
 import { AnnouncementData, defaultAnnouncementData } from '../../customer/components/Announcement';
 

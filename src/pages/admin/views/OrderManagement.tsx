@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Clock, Check, X, ChevronDown, Eye, Package, User, MessageSquare, Calendar, Euro, Trash2 } from 'lucide-react';
+import { Search, Filter, Clock, Check, X, ChevronDown, Package, User, MessageSquare, Calendar, Euro, Trash2 } from 'lucide-react';
 import { useOrder, OrderStatus } from '../../../contexts/OrderContext';
 
 const OrderManagement: React.FC = () => {
@@ -10,7 +10,7 @@ const OrderManagement: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
-  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+
 
   // Filter orders based on search query, status, and date
   const filteredOrders = orders.filter((order) => {

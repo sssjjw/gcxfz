@@ -11,8 +11,7 @@ import FlyToCart from './components/FlyToCart';
 import { useMenu } from '../../contexts/MenuContext';
 import { useCart } from '../../contexts/CartContext';
 import { useOrder, Order } from '../../contexts/OrderContext';
-import { loadDataFromStorage, saveDataToStorage } from '../../utils/storage';
-import { defaultAnnouncementData, AnnouncementData } from './components/Announcement';
+import { AnnouncementData } from './components/Announcement';
 import { forceAnnouncementSync, ANNOUNCEMENT_VERSION } from '../../utils/announcementSync';
 
 // 硬编码最新的公告数据，作为默认值和备用方案
