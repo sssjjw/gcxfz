@@ -46,7 +46,15 @@ const CustomerApp: React.FC = () => {
   // 检查URL参数确定显示模式
   const [showAdminMode, setShowAdminMode] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('admin') === 'login' || urlParams.has('admin');
+    const hasAdmin = urlParams.has('admin');
+    console.log('🔍 CustomerApp初始化 - URL检测:', {
+      url: window.location.href,
+      search: window.location.search,
+      hasAdmin,
+      adminValue: urlParams.get('admin'),
+      showAdminMode: hasAdmin
+    });
+    return hasAdmin;
   });
   
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -80,7 +88,14 @@ const CustomerApp: React.FC = () => {
   useEffect(() => {
     const handlePopState = () => {
       const urlParams = new URLSearchParams(window.location.search);
-      setShowAdminMode(urlParams.get('admin') === 'login' || urlParams.has('admin'));
+      const hasAdmin = urlParams.has('admin');
+      console.log('🔄 URL变化检测:', {
+        url: window.location.href,
+        search: window.location.search,
+        hasAdmin,
+        adminValue: urlParams.get('admin')
+      });
+      setShowAdminMode(hasAdmin);
     };
     
     window.addEventListener('popstate', handlePopState);
@@ -352,10 +367,12 @@ const CustomerApp: React.FC = () => {
 
   // 管理员模式渲染
   if (showAdminMode) {
+    console.log('🎯 渲染管理员模式:', { showAdminMode, isAuthenticated });
     return isAuthenticated ? <AdminDashboard /> : <AdminLogin />;
   }
 
   // 正常点餐界面渲染
+  console.log('🍽️ 渲染点餐界面:', { showAdminMode, isAuthenticated });
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <RestaurantHeader 

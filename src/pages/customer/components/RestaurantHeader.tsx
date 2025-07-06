@@ -110,7 +110,12 @@ const RestaurantHeader: React.FC<RestaurantHeaderProps> = ({
     // 使用URL参数的方式显示管理员登录
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('admin', 'login');
-    window.location.href = currentUrl.toString();
+    const newUrl = currentUrl.toString();
+    console.log('🔧 管理员按钮点击:', {
+      from: window.location.href,
+      to: newUrl
+    });
+    window.location.href = newUrl;
   };
 
   return (
