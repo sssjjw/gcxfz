@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Clock, MapPin, DollarSign, AlertCircle, Plus, Trash, Utensils, Star } from 'lucide-react';
+import { Plus, Trash, Utensils, Star } from 'lucide-react';
 import { AnnouncementData, defaultAnnouncementData } from '../../customer/components/Announcement';
 
 interface AnnouncementEditorProps {
