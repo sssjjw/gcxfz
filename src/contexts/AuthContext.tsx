@@ -15,13 +15,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      // For demo purposes, accept any login with username "admin" and password "password"
-      if (username.toLowerCase() === 'admin' && password === 'password') {
-        setUser({ id: '1', username: 'admin' });
+      // 管理员账户列表
+      const adminAccounts = [
+        { id: '1', username: 'admin', password: 'password' },
+        { id: '2', username: 'sjw', password: '123456' },
+        { id: '3', username: 'xsm', password: '123456' }
+      ];
+
+      // 查找匹配的账户
+      const matchedAccount = adminAccounts.find(
+        account => account.username.toLowerCase() === username.toLowerCase() && account.password === password
+      );
+
+      if (matchedAccount) {
+        setUser({ id: matchedAccount.id, username: matchedAccount.username });
         setIsAuthenticated(true);
         // Store auth state in localStorage for persistence
         localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('user', JSON.stringify({ id: '1', username: 'admin' }));
+        localStorage.setItem('user', JSON.stringify({ id: matchedAccount.id, username: matchedAccount.username }));
         return true;
       }
       return false;
