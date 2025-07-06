@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChefHat, Sparkles, Bell, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChefHat, Sparkles, Bell, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import Announcement, { defaultAnnouncementData, AnnouncementData } from './Announcement';
 import { loadDataFromStorage } from '../../../utils/storage';
 
@@ -105,6 +105,14 @@ const RestaurantHeader: React.FC<RestaurantHeaderProps> = ({
     }
   };
 
+  // 处理管理员入口点击
+  const handleAdminClick = () => {
+    // 使用URL参数的方式显示管理员登录
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('admin', 'login');
+    window.location.href = currentUrl.toString();
+  };
+
   return (
     <header ref={headerRef} className="sticky top-0 z-30 w-full">
       {/* Main Header */}
@@ -157,21 +165,33 @@ const RestaurantHeader: React.FC<RestaurantHeaderProps> = ({
             </div>
           </div>
 
-          {/* 右侧：公告按钮 */}
-          {!hideAnnouncement && announcementData.isEnabled && (
+          {/* 右侧：公告按钮和管理员入口 */}
+          <div className="flex items-center space-x-3">
+            {/* 管理员入口按钮 */}
             <button
-              onClick={handleAnnouncementButtonClick}
-              className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 transition-all duration-300 border border-white/20"
+              onClick={handleAdminClick}
+              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full px-3 py-2 transition-all duration-300 border border-white/20"
             >
-              <Bell className="h-5 w-5 text-white" />
-              <span className="text-white font-medium text-sm">公告</span>
-              {showAnnouncement ? (
-                <ChevronUp className="h-4 w-4 text-white" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-white" />
-              )}
+              <Settings className="h-4 w-4 text-white" />
+              <span className="text-white font-medium text-xs hidden sm:block">管理</span>
             </button>
-          )}
+
+            {/* 公告按钮 */}
+            {!hideAnnouncement && announcementData.isEnabled && (
+              <button
+                onClick={handleAnnouncementButtonClick}
+                className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 transition-all duration-300 border border-white/20"
+              >
+                <Bell className="h-5 w-5 text-white" />
+                <span className="text-white font-medium text-sm">公告</span>
+                {showAnnouncement ? (
+                  <ChevronUp className="h-4 w-4 text-white" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-white" />
+                )}
+              </button>
+            )}
+          </div>
         </div>
         
         {/* 底部装饰线 */}

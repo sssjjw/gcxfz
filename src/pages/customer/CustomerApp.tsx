@@ -8,9 +8,12 @@ import OrderInfoForm from './components/OrderInfoForm';
 import OrderConfirmation from './components/OrderConfirmation';
 import AnnouncementModal from './components/AnnouncementModal';
 import FlyToCart from './components/FlyToCart';
+import AdminLogin from '../admin/AdminLogin';
+import AdminDashboard from '../admin/AdminDashboard';
 import { useMenu } from '../../contexts/MenuContext';
 import { useCart } from '../../contexts/CartContext';
 import { useOrder, Order } from '../../contexts/OrderContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { AnnouncementData } from './components/Announcement';
 import { forceAnnouncementSync, ANNOUNCEMENT_VERSION } from '../../utils/announcementSync';
 
@@ -38,6 +41,13 @@ const CustomerApp: React.FC = () => {
   const { categories, menuItems, isLoading } = useMenu();
   const { items: cartItems, totalItems, subtotal, discount, total, clearCart } = useCart();
   const { createOrder } = useOrder();
+  const { isAuthenticated } = useAuth();
+  
+  // 检查URL参数确定显示模式
+  const [showAdminMode, setShowAdminMode] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('admin') === 'login' || urlParams.has('admin');
+  });
   
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -66,8 +76,21 @@ const CustomerApp: React.FC = () => {
   // 标记当前版本，用于调试
   console.log('当前公告组件版本:', ANNOUNCEMENT_VERSION);
 
-  // 页面首次加载时获取最新公告数据并显示弹窗
+  // 监听URL变化，检测管理员模式
   useEffect(() => {
+    const handlePopState = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      setShowAdminMode(urlParams.get('admin') === 'login' || urlParams.has('admin'));
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // 页面首次加载时获取最新公告数据并显示弹窗（仅在非管理员模式下）
+  useEffect(() => {
+    if (showAdminMode) return; // 管理员模式下不显示公告
+    
     // 在页面加载时清除阻止弹窗显示的标记
     try {
       localStorage.removeItem('hasShownAnnouncementModal');
@@ -93,7 +116,7 @@ const CustomerApp: React.FC = () => {
     }, latestAnnouncementData);
     
     return cleanup;
-  }, []);
+  }, [showAdminMode]);
 
   // 监听自定义事件更新公告数据
   useEffect(() => {
@@ -317,7 +340,7 @@ const CustomerApp: React.FC = () => {
     };
   }, []);
 
-  if (isLoading) {
+  if (isLoading && !showAdminMode) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="animate-pulse text-center">
@@ -327,6 +350,12 @@ const CustomerApp: React.FC = () => {
     );
   }
 
+  // 管理员模式渲染
+  if (showAdminMode) {
+    return isAuthenticated ? <AdminDashboard /> : <AdminLogin />;
+  }
+
+  // 正常点餐界面渲染
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <RestaurantHeader 
