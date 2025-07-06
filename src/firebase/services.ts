@@ -18,47 +18,7 @@ import { db } from './config';
 import { Order } from '../contexts/OrderContext';
 import { MenuItem } from '../contexts/MenuContext';
 
-// 检查Firebase是否可用
-const isFirebaseAvailable = () => {
-  return db && typeof db === 'object';
-};
-
-// localStorage服务作为Firebase的后备方案
-const localStorageService = {
-  getOrders(): Order[] {
-    try {
-      const ordersData = localStorage.getItem('restaurant_orders');
-      return ordersData ? JSON.parse(ordersData) : [];
-    } catch {
-      return [];
-    }
-  },
-  
-  saveOrders(orders: Order[]): void {
-    try {
-      localStorage.setItem('restaurant_orders', JSON.stringify(orders));
-    } catch (error) {
-      console.error('保存订单到localStorage失败:', error);
-    }
-  },
-  
-  getMenuItems(): MenuItem[] {
-    try {
-      const menuData = localStorage.getItem('restaurant_menu');
-      return menuData ? JSON.parse(menuData) : [];
-    } catch {
-      return [];
-    }
-  },
-  
-  saveMenuItems(items: MenuItem[]): void {
-    try {
-      localStorage.setItem('restaurant_menu', JSON.stringify(items));
-    } catch (error) {
-      console.error('保存菜单到localStorage失败:', error);
-    }
-  }
-};
+// Firebase云端数据存储服务
 
 // 集合名称常量
 const COLLECTIONS = {
@@ -73,45 +33,27 @@ const COLLECTIONS = {
 export const orderService = {
   // 获取所有订单
   async getAllOrders(): Promise<Order[]> {
-    if (!isFirebaseAvailable()) {
-      console.log('💾 使用localStorage获取订单');
-      return localStorageService.getOrders();
-    }
-    
     try {
       const querySnapshot = await getDocs(
         query(collection(db, COLLECTIONS.ORDERS), orderBy('createdAt', 'desc'))
       );
-      return querySnapshot.docs.map(doc => ({
+      const orders = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate() || new Date()
       })) as Order[];
+      
+      console.log('🔥 从Firebase获取订单:', orders.length);
+      return orders;
     } catch (error) {
-      console.error('获取订单失败，回退到localStorage:', error);
-      return localStorageService.getOrders();
+      console.error('❌ 获取订单失败:', error);
+      throw new Error('无法获取订单数据，请检查网络连接');
     }
   },
 
   // 创建订单
   async createOrder(orderData: Omit<Order, 'id'>): Promise<Order> {
-    const newOrder = {
-      id: 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-      ...orderData,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    if (!isFirebaseAvailable()) {
-      console.log('💾 使用localStorage创建订单');
-      const orders = localStorageService.getOrders();
-      orders.unshift(newOrder);
-      localStorageService.saveOrders(orders);
-      console.log('✅ 订单创建成功(localStorage):', newOrder.id);
-      return newOrder;
-    }
-    
     try {
       const docRef = await addDoc(collection(db, COLLECTIONS.ORDERS), {
         ...orderData,
@@ -119,56 +61,32 @@ export const orderService = {
         updatedAt: serverTimestamp()
       });
       
-      const firebaseOrder = {
+      const newOrder = {
         id: docRef.id,
         ...orderData,
         createdAt: new Date(),
         updatedAt: new Date()
       };
       
-      console.log('✅ 订单创建成功(Firebase):', firebaseOrder.id);
-      return firebaseOrder;
-    } catch (error) {
-      console.error('Firebase创建订单失败，回退到localStorage:', error);
-      const orders = localStorageService.getOrders();
-      orders.unshift(newOrder);
-      localStorageService.saveOrders(orders);
-      console.log('✅ 订单创建成功(localStorage后备):', newOrder.id);
+      console.log('🔥 订单创建成功:', newOrder.id);
       return newOrder;
+    } catch (error) {
+      console.error('❌ 创建订单失败:', error);
+      throw new Error('无法创建订单，请检查网络连接');
     }
   },
 
   // 更新订单状态
   async updateOrderStatus(orderId: string, status: Order['status']): Promise<void> {
-    if (!isFirebaseAvailable()) {
-      console.log('💾 使用localStorage更新订单状态');
-      const orders = localStorageService.getOrders();
-      const orderIndex = orders.findIndex(order => order.id === orderId);
-      if (orderIndex >= 0) {
-        orders[orderIndex].status = status;
-        orders[orderIndex].updatedAt = new Date();
-        localStorageService.saveOrders(orders);
-        console.log('✅ 订单状态更新成功(localStorage):', orderId, status);
-      }
-      return;
-    }
-    
     try {
       await updateDoc(doc(db, COLLECTIONS.ORDERS, orderId), {
         status,
         updatedAt: serverTimestamp()
       });
-      console.log('✅ 订单状态更新成功(Firebase):', orderId, status);
+      console.log('🔥 订单状态更新成功:', orderId, status);
     } catch (error) {
-      console.error('Firebase更新订单状态失败，回退到localStorage:', error);
-      const orders = localStorageService.getOrders();
-      const orderIndex = orders.findIndex(order => order.id === orderId);
-      if (orderIndex >= 0) {
-        orders[orderIndex].status = status;
-        orders[orderIndex].updatedAt = new Date();
-        localStorageService.saveOrders(orders);
-        console.log('✅ 订单状态更新成功(localStorage后备):', orderId, status);
-      }
+      console.error('❌ 更新订单状态失败:', error);
+      throw new Error('无法更新订单状态，请检查网络连接');
     }
   },
 
