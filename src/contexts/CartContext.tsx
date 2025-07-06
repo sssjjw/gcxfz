@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { MenuItem, useMenu } from './MenuContext';
+import { settingsService } from '../firebase/services';
 
 export interface CartItem {
   id: string;
@@ -24,43 +25,55 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// 从localStorage加载购物车数据
-const loadCartFromStorage = (): CartItem[] => {
+// 从Firebase加载购物车数据
+const loadCartFromFirebase = async (): Promise<CartItem[]> => {
   try {
-    const cartJson = localStorage.getItem('cart');
-    if (cartJson) {
-      return JSON.parse(cartJson);
-    }
+    const cartData = await settingsService.getSetting('cartItems');
+    return cartData || [];
   } catch (error) {
-    console.error('加载购物车数据失败:', error);
+    console.error('从Firebase加载购物车数据失败:', error);
+    return [];
   }
-  return [];
 };
 
-// 保存购物车数据到localStorage
-const saveCartToStorage = (items: CartItem[]) => {
+// 保存购物车数据到Firebase
+const saveCartToFirebase = async (items: CartItem[]) => {
   try {
-    localStorage.setItem('cart', JSON.stringify(items));
+    await settingsService.setSetting('cartItems', items);
+    console.log('🔥 购物车数据已保存到Firebase，商品数量:', items.length);
     
     // 发送自定义事件通知其他组件
     const cartUpdateEvent = new CustomEvent('cartUpdate', { detail: items });
     window.dispatchEvent(cartUpdateEvent);
   } catch (error) {
-    console.error('保存购物车数据失败:', error);
+    console.error('保存购物车数据到Firebase失败:', error);
   }
 };
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>(loadCartFromStorage());
+  const [items, setItems] = useState<CartItem[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
   const [discount, setDiscount] = useState({ type: '', value: 0, savings: 0 });
   const [total, setTotal] = useState(0);
   const { menuItems } = useMenu();
 
-  // 当购物车变化时保存到localStorage
+  // 初始化：从Firebase加载购物车数据
   useEffect(() => {
-    saveCartToStorage(items);
+    const initializeCart = async () => {
+      const cartData = await loadCartFromFirebase();
+      setItems(cartData);
+    };
+    
+    initializeCart();
+  }, []);
+
+  // 当购物车变化时保存到Firebase
+  useEffect(() => {
+    // 只有在初始化完成后才保存
+    if (items.length >= 0) {
+      saveCartToFirebase(items);
+    }
   }, [items]);
 
   // 监听其他组件触发的购物车数据更新事件

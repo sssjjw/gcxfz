@@ -32,121 +32,27 @@ interface OrderContextType {
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
-// 检查是否使用Firebase
-const useFirebase = () => {
-  return process.env.VITE_USE_FIREBASE === 'true';
-};
-
-// 从localStorage加载订单
-const loadOrdersFromStorage = (): Order[] => {
-  try {
-    const ordersJson = localStorage.getItem('orders');
-    const deletedOrdersJson = localStorage.getItem('deletedOrders');
-    
-    let orders: Order[] = [];
-    let deletedOrders: string[] = [];
-    
-    // 加载订单数据
-    if (ordersJson) {
-      orders = JSON.parse(ordersJson);
-      // 兼容旧版本订单数据，添加缺失的字段
-      orders = orders.map((order: any) => ({
-        ...order,
-        groupName: order.groupName || '未知群昵称',
-        notes: order.notes || undefined,
-      }));
-    }
-    
-    // 加载已删除订单列表
-    if (deletedOrdersJson) {
-      deletedOrders = JSON.parse(deletedOrdersJson);
-    }
-    
-    // 过滤掉已删除的订单
-    const filteredOrders = orders.filter(order => !deletedOrders.includes(order.id));
-    
-    console.log(`📥 加载订单数据: 原始${orders.length}个，过滤掉${orders.length - filteredOrders.length}个已删除，最终${filteredOrders.length}个`);
-    
-    return filteredOrders;
-  } catch (error) {
-    console.error('加载订单数据失败:', error);
-  }
-  return [];
-};
-
-// 保存订单到localStorage
-const saveOrdersToStorage = (orders: Order[]) => {
-  try {
-    console.log('💾 saveOrdersToStorage 被调用，订单数量:', orders.length);
-    localStorage.setItem('orders', JSON.stringify(orders));
-    console.log('✅ 订单数据已保存到localStorage');
-  } catch (error) {
-    console.error('❌ 保存订单数据失败:', error);
-  }
-};
-
-// 添加到已删除列表
-const addToDeletedList = (orderId: string) => {
-  try {
-    const deletedOrdersJson = localStorage.getItem('deletedOrders');
-    let deletedOrders: string[] = deletedOrdersJson ? JSON.parse(deletedOrdersJson) : [];
-    
-    if (!deletedOrders.includes(orderId)) {
-      deletedOrders.push(orderId);
-      localStorage.setItem('deletedOrders', JSON.stringify(deletedOrders));
-      console.log(`🗑️ 订单 ${orderId} 已添加到删除列表，当前删除列表长度: ${deletedOrders.length}`);
-    }
-  } catch (error) {
-    console.error('❌ 添加到删除列表失败:', error);
-  }
-};
-
-// 清理过期的删除记录（保留最近100个）
-const cleanupDeletedList = () => {
-  try {
-    const deletedOrdersJson = localStorage.getItem('deletedOrders');
-    if (deletedOrdersJson) {
-      let deletedOrders: string[] = JSON.parse(deletedOrdersJson);
-      if (deletedOrders.length > 100) {
-        // 只保留最新的100个删除记录
-        deletedOrders = deletedOrders.slice(-100);
-        localStorage.setItem('deletedOrders', JSON.stringify(deletedOrders));
-        console.log('🧹 清理删除记录，保留最新100个');
-      }
-    }
-  } catch (error) {
-    console.error('❌ 清理删除记录失败:', error);
-  }
-};
+// 现在完全使用Firebase，移除localStorage相关代码
 
 export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isFirebaseMode, setIsFirebaseMode] = useState(false);
   const [unsubscribe, setUnsubscribe] = useState<(() => void) | null>(null);
 
-  // 初始化数据加载
+  // 初始化Firebase实时监听
   useEffect(() => {
     const initializeData = async () => {
-      if (useFirebase()) {
-        console.log('🔥 使用Firebase模式');
-        setIsFirebaseMode(true);
-        try {
-          // 使用Firebase实时监听
-          const unsub = orderService.subscribeToOrders((firebaseOrders) => {
-            console.log('📥 Firebase订单更新:', firebaseOrders.length);
-            setOrders(firebaseOrders);
-          });
-          setUnsubscribe(() => unsub);
-        } catch (error) {
-          console.error('❌ Firebase初始化失败，回退到localStorage:', error);
-          setIsFirebaseMode(false);
-          setOrders(loadOrdersFromStorage());
-        }
-      } else {
-        console.log('💾 使用localStorage模式');
-        setIsFirebaseMode(false);
-        setOrders(loadOrdersFromStorage());
-        cleanupDeletedList();
+      console.log('🔥 使用Firebase云端订单存储');
+      try {
+        // 使用Firebase实时监听
+        const unsub = orderService.subscribeToOrders((firebaseOrders) => {
+          console.log('📥 Firebase订单更新:', firebaseOrders.length);
+          setOrders(firebaseOrders);
+        });
+        setUnsubscribe(() => unsub);
+      } catch (error) {
+        console.error('❌ Firebase初始化失败:', error);
+        // Firebase失败时设置空数组
+        setOrders([]);
       }
     };
 
@@ -158,50 +64,6 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     };
   }, []);
-
-  // localStorage模式下的数据同步
-  useEffect(() => {
-    if (!isFirebaseMode) {
-      saveOrdersToStorage(orders);
-    }
-  }, [orders, isFirebaseMode]);
-
-  // localStorage模式下监听外部更新事件
-  useEffect(() => {
-    if (!isFirebaseMode) {
-      const handleOrderUpdate = (e: CustomEvent<Order[]>) => {
-        console.log('📡 收到orderUpdate事件，detail:', e.detail);
-        
-        if (e.detail === null || (Array.isArray(e.detail) && e.detail.length === 0)) {
-          console.log('🗑️ 清空订单数据');
-          setOrders([]);
-          return;
-        }
-        
-        if (e.detail && Array.isArray(e.detail)) {
-          try {
-            const deletedOrdersJson = localStorage.getItem('deletedOrders');
-            const deletedOrders: string[] = deletedOrdersJson ? JSON.parse(deletedOrdersJson) : [];
-            
-            const filteredDetail = e.detail.filter(order => !deletedOrders.includes(order.id));
-            console.log(`🔄 过滤外部事件数据: 原始${e.detail.length}个，过滤后${filteredDetail.length}个`);
-            
-            if (JSON.stringify(orders) !== JSON.stringify(filteredDetail)) {
-              console.log('🔄 更新订单数据');
-              setOrders(filteredDetail);
-            }
-          } catch (error) {
-            console.error('❌ 处理外部事件失败:', error);
-          }
-        }
-      };
-
-      window.addEventListener('orderUpdate', handleOrderUpdate as EventListener);
-      return () => {
-        window.removeEventListener('orderUpdate', handleOrderUpdate as EventListener);
-      };
-    }
-  }, [orders, isFirebaseMode]);
 
   // Generate pickup code with today's date + sequence number (e.g., 20241215001)
   const generatePickupCode = (): string => {
@@ -261,73 +123,31 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updatedAt: now,
     };
 
-    if (isFirebaseMode) {
-      try {
-        return await orderService.createOrder(orderData);
-      } catch (error) {
-        console.error('❌ Firebase创建订单失败:', error);
-        throw error;
-      }
-    } else {
-      const newOrder: Order = {
-        id: `order-${now.getTime()}`,
-        ...orderData
-      };
-
-      setOrders((prevOrders) => [...prevOrders, newOrder]);
-      return newOrder;
+    try {
+      return await orderService.createOrder(orderData);
+    } catch (error) {
+      console.error('❌ Firebase创建订单失败:', error);
+      throw error;
     }
   };
 
   const updateOrderStatus = async (id: string, status: OrderStatus): Promise<void> => {
-    if (isFirebaseMode) {
-      try {
-        await orderService.updateOrderStatus(id, status);
-      } catch (error) {
-        console.error('❌ Firebase更新订单状态失败:', error);
-        throw error;
-      }
-    } else {
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === id
-            ? { ...order, status, updatedAt: new Date() }
-            : order
-        )
-      );
+    try {
+      await orderService.updateOrderStatus(id, status);
+    } catch (error) {
+      console.error('❌ Firebase更新订单状态失败:', error);
+      throw error;
     }
   };
 
   const deleteOrder = async (id: string): Promise<void> => {
     console.log('🗑️ 删除订单:', id);
     
-    if (isFirebaseMode) {
-      try {
-        await orderService.deleteOrder(id);
-      } catch (error) {
-        console.error('❌ Firebase删除订单失败:', error);
-        throw error;
-      }
-    } else {
-      addToDeletedList(id);
-      
-      setOrders((prevOrders) => {
-        const filteredOrders = prevOrders.filter((order) => order.id !== id);
-        console.log('💾 删除后订单数量:', filteredOrders.length);
-        
-        try {
-          localStorage.setItem('orders', JSON.stringify(filteredOrders));
-          console.log('✅ 删除操作已同步到localStorage');
-        } catch (error) {
-          console.error('❌ 删除操作同步失败:', error);
-        }
-        
-        return filteredOrders;
-      });
-      
-      setTimeout(() => {
-        cleanupDeletedList();
-      }, 1000);
+    try {
+      await orderService.deleteOrder(id);
+    } catch (error) {
+      console.error('❌ Firebase删除订单失败:', error);
+      throw error;
     }
   };
 
@@ -354,20 +174,15 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const clearAllOrders = async (): Promise<void> => {
-    console.log('🧹 手动清理所有订单和删除记录');
+    console.log('🧹 手动清理所有Firebase订单数据');
     
-    if (isFirebaseMode) {
-      try {
-        // 这里需要实现Firebase的清理方法
-        console.log('Firebase清理功能待实现');
-      } catch (error) {
-        console.error('❌ Firebase清理失败:', error);
-        throw error;
-      }
-    } else {
-      setOrders([]);
-      localStorage.removeItem('orders');
-      localStorage.removeItem('deletedOrders');
+    try {
+      const { migrationService } = await import('../firebase/services');
+      await migrationService.clearAllData();
+      console.log('✅ Firebase数据清理完成');
+    } catch (error) {
+      console.error('❌ Firebase清理失败:', error);
+      throw error;
     }
   };
 

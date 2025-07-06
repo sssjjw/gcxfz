@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { 
   Bell, 
   User, 
@@ -17,11 +17,10 @@ interface AdminHeaderProps {
 const AdminHeader: React.FC<AdminHeaderProps> = () => {
   const { logout, user } = useAuth();
   const { orders } = useOrder();
-  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     // 保持admin参数，避免被CustomerApp判断为非管理员模式
     window.location.href = '?admin=login';
   };
@@ -187,7 +186,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = () => {
                   <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-md">
                     <button 
                       onClick={() => {
-                        navigate('/admin/orders');
+                        window.location.href = '?admin=orders';
                         setShowNotifications(false);
                       }}
                       className="w-full text-center text-sm text-orange-600 hover:text-orange-800 font-medium"

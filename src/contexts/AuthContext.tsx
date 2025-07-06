@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
+import { settingsService } from '../firebase/services';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -27,11 +28,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
 
       if (matchedAccount) {
-        setUser({ id: matchedAccount.id, username: matchedAccount.username });
+        const userInfo = { id: matchedAccount.id, username: matchedAccount.username };
+        setUser(userInfo);
         setIsAuthenticated(true);
-        // Store auth state in localStorage for persistence
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('user', JSON.stringify({ id: matchedAccount.id, username: matchedAccount.username }));
+        
+        // Store auth state in Firebase for persistence
+        try {
+          await settingsService.setSetting('authSession', {
+            isAuthenticated: true,
+            user: userInfo,
+            loginTime: new Date().toISOString()
+          });
+          console.log('🔥 认证状态已保存到Firebase');
+        } catch (error) {
+          console.error('❌ 保存认证状态到Firebase失败:', error);
+        }
+        
         return true;
       }
       return false;
@@ -41,23 +53,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     setIsAuthenticated(false);
-    // Clear auth state from localStorage
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('user');
+    
+    // Clear auth state from Firebase
+    try {
+      await settingsService.deleteSetting('authSession');
+      console.log('🔥 认证状态已从Firebase清除');
+    } catch (error) {
+      console.error('❌ 清除Firebase认证状态失败:', error);
+    }
   };
 
-  // Check for existing auth state on mount
+  // Check for existing auth state from Firebase on mount
   React.useEffect(() => {
-    const storedAuth = localStorage.getItem('isAuthenticated');
-    const storedUser = localStorage.getItem('user');
+    const checkAuthState = async () => {
+      try {
+        const authSession = await settingsService.getSetting('authSession');
+        
+        if (authSession?.isAuthenticated && authSession?.user) {
+          setIsAuthenticated(true);
+          setUser(authSession.user);
+          console.log('🔥 从Firebase恢复认证状态:', authSession.user.username);
+        }
+      } catch (error) {
+        console.error('❌ 检查Firebase认证状态失败:', error);
+      }
+    };
     
-    if (storedAuth === 'true' && storedUser) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(storedUser));
-    }
+    checkAuthState();
   }, []);
 
   return (

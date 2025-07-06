@@ -1,5 +1,4 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminHeader from './components/AdminHeader';
 import AdminSidebar from './components/AdminSidebar';
 import Dashboard from './views/Dashboard';
@@ -15,7 +14,9 @@ const AdminDashboard: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
   if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace />;
+    // 未认证时跳转到登录页面
+    window.location.href = '?admin=login';
+    return null;
   }
 
   // 根据URL参数确定默认页面

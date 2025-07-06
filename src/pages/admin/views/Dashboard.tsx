@@ -1,10 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Users, DollarSign, ShoppingBag, Clock, ArrowRight } from 'lucide-react';
 import { useOrder } from '../../../contexts/OrderContext';
 
 const Dashboard: React.FC = () => {
-  const navigate = useNavigate();
   const { orders } = useOrder();
   
   // Calculate today's orders
@@ -189,7 +187,7 @@ const Dashboard: React.FC = () => {
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                       <button 
-                        onClick={() => navigate('/admin/orders')}
+                        onClick={() => window.location.href = '?admin=orders'}
                         className="text-orange-600 hover:text-orange-900"
                       >
                         查看详情

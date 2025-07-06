@@ -18,10 +18,10 @@ interface Discount {
   description: string;
 }
 
-// 从Firebase和localStorage加载数据函数
-const loadDataFromStorage = async <T,>(key: string, defaultValue: T): Promise<T> => {
+// 从Firebase加载数据函数
+const loadDataFromFirebase = async <T,>(key: string, defaultValue: T): Promise<T> => {
   try {
-    // 优先从Firebase加载数据
+    // 从Firebase加载数据
     console.log(`🔄 正在从Firebase加载${key}数据...`);
     const firebaseData = await settingsService.getSetting(key);
     
@@ -30,36 +30,12 @@ const loadDataFromStorage = async <T,>(key: string, defaultValue: T): Promise<T>
       return firebaseData;
     }
     
-    // Firebase没有数据，尝试从localStorage加载
-    console.log(`⚠️ Firebase没有${key}数据，尝试从localStorage加载...`);
-    const localData = localStorage.getItem(key);
-    
-    if (localData) {
-      const parsedData = JSON.parse(localData);
-      
-      // 如果localStorage有数据但Firebase没有，迁移数据到Firebase
-      console.log(`🚀 正在迁移${key}数据到Firebase...`);
-      try {
-        await settingsService.setSetting(key, parsedData);
-        console.log(`✅ ${key}数据迁移到Firebase成功`);
-      } catch (error) {
-        console.error(`❌ ${key}数据迁移失败:`, error);
-      }
-      
-      return parsedData;
-    }
-    
+    // Firebase没有数据，返回默认值
+    console.log(`⚠️ Firebase没有${key}数据，使用默认值`);
     return defaultValue;
   } catch (error) {
-    console.error(`❌ 加载${key}数据失败:`, error);
-    // 如果Firebase连接失败，回退到localStorage
-    try {
-      const localData = localStorage.getItem(key);
-      return localData ? JSON.parse(localData) : defaultValue;
-    } catch (localError) {
-      console.error(`❌ 从localStorage加载${key}数据也失败:`, localError);
-      return defaultValue;
-    }
+    console.error(`❌ 从Firebase加载${key}数据失败:`, error);
+    return defaultValue;
   }
 };
 

@@ -106,18 +106,8 @@ const CustomerApp: React.FC = () => {
   useEffect(() => {
     if (showAdminMode) return; // 管理员模式下不显示公告
     
-    // 在页面加载时清除阻止弹窗显示的标记
-    try {
-      localStorage.removeItem('hasShownAnnouncementModal');
-      
-      // 输出当前localStorage状态，帮助调试
-      console.log('localStorage状态:', {
-        announcementData: localStorage.getItem('announcementData'),
-        hasShownAnnouncementModal: localStorage.getItem('hasShownAnnouncementModal')
-      });
-    } catch (e) {
-      console.error("清除缓存失败:", e);
-    }
+    // 公告数据现在完全从Firebase获取，不再使用localStorage
+    console.log('📢 公告数据将从Firebase云端获取');
     
     // 使用同步工具获取最新数据
     const cleanup = forceAnnouncementSync((freshData) => {

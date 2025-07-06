@@ -258,12 +258,12 @@ const sampleMenuItems: MenuItem[] = [
   },
 ];
 
-// 从Firebase和localStorage加载菜单数据
-const loadMenuDataFromStorage = async () => {
+// 从Firebase加载菜单数据
+const loadMenuDataFromFirebase = async () => {
   try {
     console.log('🔄 正在从Firebase加载菜单数据...');
     
-    // 优先从Firebase加载数据
+    // 从Firebase加载数据
     const [firebaseMenuItems, firebaseCategories] = await Promise.all([
       menuService.getAllMenuItems(),
       settingsService.getSetting('categories')
@@ -277,73 +277,46 @@ const loadMenuDataFromStorage = async () => {
       };
     }
     
-    // Firebase没有数据，尝试从localStorage加载
-    console.log('⚠️ Firebase没有菜单数据，尝试从localStorage加载...');
-    const menuItemsJson = localStorage.getItem('menuItems');
-    const categoriesJson = localStorage.getItem('categories');
-    
-    const localData = {
-      menuItems: menuItemsJson ? JSON.parse(menuItemsJson) : sampleMenuItems,
-      categories: categoriesJson ? JSON.parse(categoriesJson) : sampleCategories
-    };
-    
-    // 如果localStorage有数据但Firebase没有，迁移数据到Firebase
-    if (localData.menuItems && localData.menuItems.length > 0) {
-      console.log('🚀 正在迁移菜单数据到Firebase...');
-      try {
-        // 迁移菜品数据
-        for (const item of localData.menuItems) {
-          await menuService.createMenuItem(item);
-        }
-        // 迁移分类数据
-        await settingsService.setSetting('categories', localData.categories);
-        console.log('✅ 菜单数据迁移到Firebase成功');
-      } catch (error) {
-        console.error('❌ 菜单数据迁移失败:', error);
-      }
-    }
-    
-    return localData;
-  } catch (error) {
-    console.error('❌ 加载菜单数据失败:', error);
-    // 如果Firebase连接失败，回退到localStorage
+    // Firebase没有数据，自动初始化示例数据
+    console.log('⚠️ Firebase没有菜单数据，正在初始化示例数据...');
     try {
-      const menuItemsJson = localStorage.getItem('menuItems');
-      const categoriesJson = localStorage.getItem('categories');
+      // 初始化菜品数据
+      for (const item of sampleMenuItems) {
+        await menuService.createMenuItem(item);
+      }
+      // 初始化分类数据
+      await settingsService.setSetting('categories', sampleCategories);
+      console.log('✅ 示例菜单数据初始化成功');
       
       return {
-        menuItems: menuItemsJson ? JSON.parse(menuItemsJson) : sampleMenuItems,
-        categories: categoriesJson ? JSON.parse(categoriesJson) : sampleCategories
+        menuItems: sampleMenuItems,
+        categories: sampleCategories
       };
-    } catch (localError) {
-      console.error('❌ 从localStorage加载菜单数据也失败:', localError);
+    } catch (error) {
+      console.error('❌ 初始化示例数据失败:', error);
       return { menuItems: sampleMenuItems, categories: sampleCategories };
     }
+  } catch (error) {
+    console.error('❌ 加载菜单数据失败:', error);
+    // 返回示例数据作为最后的回退
+    return { menuItems: sampleMenuItems, categories: sampleCategories };
   }
 };
 
-// 保存菜单数据到localStorage和Firebase
-const saveMenuDataToStorage = async (menuItems: MenuItem[], categories: Category[]) => {
+// 保存菜单数据到Firebase
+const saveMenuDataToFirebase = async (categories: Category[]) => {
   try {
-    // 保存到localStorage（作为缓存）
-    localStorage.setItem('menuItems', JSON.stringify(menuItems));
-    localStorage.setItem('categories', JSON.stringify(categories));
-    
-    // 保存到Firebase（主要存储）
-    try {
-      await settingsService.setSetting('categories', categories);
-      console.log('✅ 分类数据已保存到Firebase');
-    } catch (firebaseError) {
-      console.error('❌ 保存分类数据到Firebase失败:', firebaseError);
-    }
+    // 保存到Firebase
+    await settingsService.setSetting('categories', categories);
+    console.log('✅ 分类数据已保存到Firebase');
     
     // 发送自定义事件通知其他组件
     const menuUpdateEvent = new CustomEvent('menuUpdate', { 
-      detail: { menuItems, categories } 
+      detail: { categories } 
     });
     window.dispatchEvent(menuUpdateEvent);
   } catch (error) {
-    console.error('保存菜单数据失败:', error);
+    console.error('❌ 保存分类数据到Firebase失败:', error);
   }
 };
 
@@ -355,13 +328,13 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // 当菜单数据变化时保存到localStorage和Firebase
+  // 当分类数据变化时保存到Firebase
   useEffect(() => {
     // 只有当数据不为空时才保存
-    if (menuItems.length > 0 || categories.length > 0) {
-      saveMenuDataToStorage(menuItems, categories);
+    if (categories.length > 0) {
+      saveMenuDataToFirebase(categories);
     }
-  }, [menuItems, categories]);
+  }, [categories]);
 
   // 异步加载菜单数据
   useEffect(() => {
@@ -370,7 +343,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null);
       
       try {
-        const data = await loadMenuDataFromStorage();
+        const data = await loadMenuDataFromFirebase();
         setMenuItems(data.menuItems);
         setCategories(data.categories);
       } catch (err) {
@@ -468,13 +441,9 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // 更新本地状态
       const newCategories = [...categories, category];
       setCategories(newCategories);
-      
-      // 保存到Firebase
-      await settingsService.setSetting('categories', newCategories);
-      console.log('✅ 分类已添加到Firebase:', category.name);
+      console.log('✅ 分类已添加:', category.name);
     } catch (error) {
-      console.error('❌ 添加分类到Firebase失败:', error);
-      // 即使Firebase失败，也保持本地状态更新
+      console.error('❌ 添加分类失败:', error);
     }
   };
 
@@ -485,13 +454,9 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
         prevCategory.id === id ? { ...prevCategory, ...category } : prevCategory
       );
       setCategories(newCategories);
-      
-      // 保存到Firebase
-      await settingsService.setSetting('categories', newCategories);
-      console.log('✅ 分类已更新到Firebase:', id);
+      console.log('✅ 分类已更新:', id);
     } catch (error) {
-      console.error('❌ 更新分类到Firebase失败:', error);
-      // 即使Firebase失败，也保持本地状态更新
+      console.error('❌ 更新分类失败:', error);
     }
   };
 
@@ -500,13 +465,9 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // 更新本地状态
       const newCategories = categories.filter((category) => category.id !== id);
       setCategories(newCategories);
-      
-      // 保存到Firebase
-      await settingsService.setSetting('categories', newCategories);
-      console.log('✅ 分类已从Firebase删除:', id);
+      console.log('✅ 分类已删除:', id);
     } catch (error) {
-      console.error('❌ 从Firebase删除分类失败:', error);
-      // 即使Firebase失败，也保持本地状态更新
+      console.error('❌ 删除分类失败:', error);
     }
   };
 

@@ -490,13 +490,13 @@ const Statistics: React.FC = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-gray-500">总销售额</h3>
             {statisticsData.totalRevenue > 0 ? (
-              <span className="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+            <span className="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
                 实时数据
               </span>
             ) : (
               <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                 暂无数据
-              </span>
+            </span>
             )}
           </div>
           <p className="mt-2 text-3xl font-bold text-gray-900">€{statisticsData.totalRevenue.toFixed(1)}</p>
@@ -518,7 +518,7 @@ const Statistics: React.FC = () => {
             ) : (
               <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                 暂无数据
-              </span>
+            </span>
             )}
           </div>
           <p className="mt-2 text-3xl font-bold text-gray-900">{statisticsData.totalOrders}</p>
@@ -540,11 +540,11 @@ const Statistics: React.FC = () => {
             ) : (
               <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                 暂无数据
-              </span>
+            </span>
             )}
           </div>
           <p className="mt-2 text-3xl font-bold text-gray-900">€{statisticsData.averageOrderValue.toFixed(1)}</p>
-          <div className="mt-1 text-sm text-gray-500">
+            <div className="mt-1 text-sm text-gray-500">
             基于 {statisticsData.totalOrders} 个订单计算
           </div>
         </div>
