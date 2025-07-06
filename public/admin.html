@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>哥村小饭桌 - 管理员后台</title>
+  <script type="module" crossorigin src="./assets/index.js"></script>
+  <link rel="stylesheet" href="./assets/index.css">
+  <script>
+    // 设置管理员模式标记
+    window.__ADMIN_MODE__ = true;
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="module">
+    // 动态加载React应用，并强制管理员模式
+    import('./assets/index.js').then(() => {
+      // 通过URL参数强制管理员模式
+      if (!window.location.search.includes('admin')) {
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('admin', 'login');
+        window.history.replaceState(null, '', newUrl.toString());
+      }
+    });
+  </script>
+</body>
+</html> 
