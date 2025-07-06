@@ -89,9 +89,9 @@
     <div class="logo">🍚</div>
     <h1>哥村小饭桌<br>管理员后台</h1>
     
-    <a href="/gcxfz/index.html?admin=login" class="button">
+    <button id="adminButton" class="button">
       进入管理后台
-    </a>
+    </button>
     
     <a href="/gcxfz/" class="button secondary">
       返回点餐页面
@@ -112,12 +112,18 @@
     
     // 为按钮添加点击事件
     document.addEventListener('DOMContentLoaded', function() {
-      const adminButton = document.querySelector('.button:not(.secondary)');
+      const adminButton = document.getElementById('adminButton');
       if (adminButton) {
-        adminButton.addEventListener('click', function(e) {
-          e.preventDefault();
+        adminButton.addEventListener('click', function() {
           console.log('🔄 跳转到管理员后台...');
-          window.location.href = '/gcxfz/?admin=login';
+          console.log('当前页面:', window.location.href);
+          
+          // 确保使用正确的路径
+          const targetUrl = '/gcxfz/?admin=login';
+          console.log('目标URL:', targetUrl);
+          
+          // 使用window.location.href进行跳转
+          window.location.href = targetUrl;
         });
       }
     });

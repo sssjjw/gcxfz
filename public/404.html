@@ -4,18 +4,26 @@
     <meta charset="utf-8">
     <title>美食之家点餐系统</title>
     <script type="text/javascript">
-      // GitHub Pages SPA路由处理
-      // 将路径信息存储在sessionStorage中，然后重定向到index.html
-      var pathSegmentsToKeep = 1;
-      
+      // GitHub Pages SPA路由处理 - 修复/gcxfz子目录部署
       var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+      var basePath = '/gcxfz/';
+      
+      // 检查当前路径是否在gcxfz目录下
+      if (l.pathname.startsWith('/gcxfz/')) {
+        // 提取/gcxfz/之后的路径部分
+        var pathAfterBase = l.pathname.substring('/gcxfz/'.length);
+        
+        // 重定向到index.html，保持路径信息
+        l.replace(
+          l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + 
+          basePath + '?/' + pathAfterBase +
+          (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+          l.hash
+        );
+      } else {
+        // 如果不在gcxfz目录下，重定向到gcxfz主页
+        l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + basePath);
+      }
     </script>
   </head>
   <body>
