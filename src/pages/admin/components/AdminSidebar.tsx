@@ -1,5 +1,4 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
 import { 
   X, 
   LayoutDashboard, 
@@ -17,6 +16,16 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
+  // 获取当前页面
+  const getCurrentPage = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('admin') || 'dashboard';
+  };
+
+  // 导航到指定页面
+  const navigateToPage = (page: string) => {
+    window.location.href = `?admin=${page}`;
+  };
   return (
     <>
       {/* Mobile backdrop */}
@@ -49,94 +58,82 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
         <nav className="mt-5 px-4">
           <ul className="space-y-1">
             <li>
-              <NavLink
-                to="/admin/dashboard"
-                className={({ isActive }) => 
-                  `flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
-                    isActive 
-                      ? 'bg-orange-50 text-orange-700' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`
-                }
+              <button
+                onClick={() => navigateToPage('dashboard')}
+                className={`w-full flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
+                  getCurrentPage() === 'dashboard'
+                    ? 'bg-orange-50 text-orange-700' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 <LayoutDashboard className="mr-3 h-5 w-5" />
                 控制面板
-              </NavLink>
+              </button>
             </li>
             <li>
-              <NavLink
-                to="/admin/orders"
-                className={({ isActive }) => 
-                  `flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
-                    isActive 
-                      ? 'bg-orange-50 text-orange-700' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`
-                }
+              <button
+                onClick={() => navigateToPage('orders')}
+                className={`w-full flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
+                  getCurrentPage() === 'orders'
+                    ? 'bg-orange-50 text-orange-700' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 <ClipboardList className="mr-3 h-5 w-5" />
                 订单管理
-              </NavLink>
+              </button>
             </li>
             <li>
-              <NavLink
-                to="/admin/menu"
-                className={({ isActive }) => 
-                  `flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
-                    isActive 
-                      ? 'bg-orange-50 text-orange-700' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`
-                }
+              <button
+                onClick={() => navigateToPage('menu')}
+                className={`w-full flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
+                  getCurrentPage() === 'menu'
+                    ? 'bg-orange-50 text-orange-700' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 <UtensilsCrossed className="mr-3 h-5 w-5" />
                 菜品管理
-              </NavLink>
+              </button>
             </li>
             <li>
-              <NavLink
-                to="/admin/preparation"
-                className={({ isActive }) => 
-                  `flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
-                    isActive 
-                      ? 'bg-orange-50 text-orange-700' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`
-                }
+              <button
+                onClick={() => navigateToPage('preparation')}
+                className={`w-full flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
+                  getCurrentPage() === 'preparation'
+                    ? 'bg-orange-50 text-orange-700' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 <ChefHat className="mr-3 h-5 w-5" />
                 备餐统计
-              </NavLink>
+              </button>
             </li>
             <li>
-              <NavLink
-                to="/admin/statistics"
-                className={({ isActive }) => 
-                  `flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
-                    isActive 
-                      ? 'bg-orange-50 text-orange-700' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`
-                }
+              <button
+                onClick={() => navigateToPage('statistics')}
+                className={`w-full flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
+                  getCurrentPage() === 'statistics'
+                    ? 'bg-orange-50 text-orange-700' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 <BarChart3 className="mr-3 h-5 w-5" />
                 数据统计
-              </NavLink>
+              </button>
             </li>
             <li>
-              <NavLink
-                to="/admin/settings"
-                className={({ isActive }) => 
-                  `flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
-                    isActive 
-                      ? 'bg-orange-50 text-orange-700' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`
-                }
+              <button
+                onClick={() => navigateToPage('settings')}
+                className={`w-full flex items-center rounded-lg px-4 py-3 text-sm font-medium ${
+                  getCurrentPage() === 'settings'
+                    ? 'bg-orange-50 text-orange-700' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 <Settings className="mr-3 h-5 w-5" />
                 系统设置
-              </NavLink>
+              </button>
             </li>
           </ul>
         </nav>

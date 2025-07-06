@@ -22,8 +22,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = () => {
 
   const handleLogout = () => {
     logout();
-    // 使用相对路径，避免跳转到根目录
-    navigate('/admin/login', { replace: true });
+    // 保持admin参数，避免被CustomerApp判断为非管理员模式
+    window.location.href = '?admin=login';
   };
 
   // 计算通知数据
