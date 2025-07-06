@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>哥村小饭桌 - 管理员后台</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+    
+    .logo {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 1.8em;
+    }
+    
+    .button {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-weight: 600;
+      margin: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    
+    .button.secondary {
+      background: #f8f9fa;
+      color: #495057;
+      border: 2px solid #dee2e6;
+    }
+    
+    .info {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      font-size: 0.9em;
+      color: #666;
+    }
+    
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🍚</div>
+    <h1>哥村小饭桌<br>管理员后台</h1>
+    
+    <button id="adminButton" class="button">
+      进入管理后台
+    </button>
+    
+    <a href="/gcxfz/" class="button secondary">
+      返回点餐页面
+    </a>
+    
+    <div class="info">
+      <strong>📋 管理员入口</strong>
+      <p>请使用您的管理员账户登录</p>
+    </div>
+  </div>
+
+  <script>
+    // 管理员页面专用脚本
+    console.log('📋 管理员入口页面已加载');
+    
+    // 为按钮添加点击事件
+    document.addEventListener('DOMContentLoaded', function() {
+      const adminButton = document.getElementById('adminButton');
+      if (adminButton) {
+        adminButton.addEventListener('click', function() {
+          console.log('🔄 跳转到管理员后台...');
+          console.log('当前页面:', window.location.href);
+          
+          // 确保使用正确的路径
+          const targetUrl = '/gcxfz/?admin=login';
+          console.log('目标URL:', targetUrl);
+          
+          // 使用window.location.href进行跳转
+          window.location.href = targetUrl;
+        });
+      }
+    });
+  </script>
+</body>
+</html> 

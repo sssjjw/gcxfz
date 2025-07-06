@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="app-version" content="2.0.0" />
+    <title>Modern Restaurant Ordering System</title>
+    
+    <!-- GitHub Pages SPA路由恢复脚本 -->
+    <script type="text/javascript">
+      // SPA路由处理：恢复从404.html重定向过来的路径
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+    
+    <script>
+      (function() {
+        if (!window.localStorage.getItem('force_loaded')) {
+          window.localStorage.setItem('force_loaded', 'true');
+          window.localStorage.removeItem('announcementData');
+          window.localStorage.removeItem('hasShownAnnouncementModal');
+          
+          if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            document.addEventListener('DOMContentLoaded', function() {
+              for (var key in localStorage) {
+                if (key !== 'app_version' && key !== 'force_loaded') {
+                  localStorage.removeItem(key);
+                }
+              }
+            });
+          }
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/gcxfz/assets/index-G67Wj3Pc-1751836592382.js"></script>
+    <link rel="modulepreload" crossorigin href="/gcxfz/assets/vendor-Bm7FCeSL-1751836592382.js">
+    <link rel="modulepreload" crossorigin href="/gcxfz/assets/firebase-BlW410b--1751836592382.js">
+    <link rel="stylesheet" crossorigin href="/gcxfz/assets/index-PgWImgqN-1751836592382.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
