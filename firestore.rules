@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 允许所有读写操作 - 用于开发测试
+    // 生产环境中应该添加更严格的权限控制
+    match /{document=**} {
+      allow read, write: if true;
+    }
+    
+    // 菜单项集合
+    match /menuItems/{menuItemId} {
+      allow read, write: if true;
+    }
+    
+    // 订单集合  
+    match /orders/{orderId} {
+      allow read, write: if true;
+    }
+    
+    // 系统设置集合
+    match /settings/{settingId} {
+      allow read, write: if true;
+    }
+    
+    // 已删除订单集合
+    match /deletedOrders/{orderId} {
+      allow read, write: if true;
+    }
+  }
+} 

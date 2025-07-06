@@ -109,19 +109,39 @@
       logEl.textContent = '';
     };
     
+    // 清理配置值函数
+    const cleanConfigValue = (value, fallback) => {
+      if (!value) return fallback;
+      return value.replace(/\s/g, '').trim();
+    };
+
     // Firebase配置
     const firebaseConfig = {
-      apiKey: "AIzaSyBwgWBxCIarv1kO0kXpUuXCAA7TaVvbqrA",
-      authDomain: "gcxfz-restaurant.firebaseapp.com",
-      projectId: "gcxfz-restaurant",
-      storageBucket: "gcxfz-restaurant.firebasestorage.app",
-      messagingSenderId: "112720952941",
-      appId: "1:112720952941:web:ab4e3dce42b152edba0964"
+      apiKey: cleanConfigValue("AIzaSyBwgWBxCIarv1kO0kXpUuXCAA7TaVvbqrA", "AIzaSyBwgWBxCIarv1kO0kXpUuXCAA7TaVvbqrA"),
+      authDomain: cleanConfigValue("gcxfz-restaurant.firebaseapp.com", "gcxfz-restaurant.firebaseapp.com"),
+      projectId: cleanConfigValue("gcxfz-restaurant", "gcxfz-restaurant"),
+      storageBucket: cleanConfigValue("gcxfz-restaurant.firebasestorage.app", "gcxfz-restaurant.firebasestorage.app"),
+      messagingSenderId: cleanConfigValue("112720952941", "112720952941"),
+      appId: cleanConfigValue("1:112720952941:web:ab4e3dce42b152edba0964", "1:112720952941:web:ab4e3dce42b152edba0964")
     };
     
     try {
       log('🔥 开始初始化Firebase...');
-      log('配置: ' + JSON.stringify(firebaseConfig, null, 2));
+      
+      // 详细的配置检查
+      log('🔧 配置检查:');
+      log('  apiKey: ' + (firebaseConfig.apiKey ? firebaseConfig.apiKey.substring(0, 10) + '...' : 'undefined'));
+      log('  authDomain: ' + firebaseConfig.authDomain);
+      log('  projectId: ' + firebaseConfig.projectId);
+      log('  storageBucket: ' + firebaseConfig.storageBucket);
+      log('  messagingSenderId: ' + firebaseConfig.messagingSenderId);
+      log('  appId: ' + (firebaseConfig.appId ? firebaseConfig.appId.substring(0, 20) + '...' : 'undefined'));
+      
+      // 检查projectId中是否有异常字符
+      const projectIdHex = Array.from(firebaseConfig.projectId).map(c => c.charCodeAt(0).toString(16)).join(' ');
+      log('  projectId字符编码: ' + projectIdHex);
+      
+      log('完整配置: ' + JSON.stringify(firebaseConfig, null, 2));
       
       // 初始化Firebase
       const app = initializeApp(firebaseConfig);
