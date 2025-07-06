@@ -1,31 +1,136 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>美食之家点餐系统</title>
-    <script type="text/javascript">
-      // GitHub Pages SPA路由处理 - 修复/gcxfz子目录部署
-      var l = window.location;
-      var basePath = '/gcxfz/';
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>哥村小饭桌 - 正在跳转...</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+    
+    .container {
+      text-align: center;
+    }
+    
+    .logo {
+      font-size: 4em;
+      margin-bottom: 20px;
+    }
+    
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .debug {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      max-width: 600px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🍚</div>
+    <h1>哥村小饭桌</h1>
+    <div class="spinner"></div>
+    <p>正在跳转到点餐系统...</p>
+    <div class="debug" id="debug"></div>
+  </div>
+
+  <script>
+    // 更强大的GitHub Pages重定向脚本
+    (function() {
+      const debugEl = document.getElementById('debug');
       
-      // 检查当前路径是否在gcxfz目录下
-      if (l.pathname.startsWith('/gcxfz/')) {
-        // 提取/gcxfz/之后的路径部分
-        var pathAfterBase = l.pathname.substring('/gcxfz/'.length);
-        
-        // 重定向到index.html，保持路径信息
-        l.replace(
-          l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + 
-          basePath + '?/' + pathAfterBase +
-          (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-          l.hash
-        );
-      } else {
-        // 如果不在gcxfz目录下，重定向到gcxfz主页
-        l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + basePath);
+      function log(message) {
+        console.log(message);
+        debugEl.innerHTML += message + '<br>';
       }
-    </script>
-  </head>
-  <body>
-  </body>
+      
+      log('🔄 404页面重定向处理');
+      log('当前URL: ' + window.location.href);
+      log('协议: ' + window.location.protocol);
+      log('主机: ' + window.location.host);
+      log('路径: ' + window.location.pathname);
+      log('查询: ' + window.location.search);
+      log('片段: ' + window.location.hash);
+      
+      const protocol = window.location.protocol;
+      const host = window.location.host;
+      const pathname = window.location.pathname;
+      const search = window.location.search;
+      const hash = window.location.hash;
+      
+      // 构建基础URL
+      const baseUrl = protocol + '//' + host;
+      
+      // 检查是否是GitHub Pages域名
+      const isGithubPages = host.includes('github.io');
+      
+      log('是否GitHub Pages: ' + isGithubPages);
+      
+      let targetUrl = baseUrl + '/gcxfz/';
+      
+      // 检查各种路径情况
+      if (pathname === '/' || pathname === '') {
+        log('🏠 根目录访问');
+        targetUrl += search + hash;
+      } else if (pathname === '/gcxfz') {
+        log('📁 /gcxfz访问（无尾部斜杠）');
+        targetUrl += search + hash;
+      } else if (pathname.startsWith('/gcxfz/')) {
+        log('🎯 已在/gcxfz/路径下');
+        // 如果是SPA路由，保持当前URL
+        if (pathname === '/gcxfz/') {
+          targetUrl = window.location.href;
+        } else {
+          // 可能是深层路由，重定向到主页并保持路径信息
+          const spaPath = pathname.replace('/gcxfz/', '');
+          targetUrl = baseUrl + '/gcxfz/' + search + '#/' + spaPath;
+        }
+      } else {
+        log('🌐 其他路径: ' + pathname);
+        // 可能是仓库名问题，强制重定向到/gcxfz/
+        targetUrl += search + hash;
+      }
+      
+      log('目标URL: ' + targetUrl);
+      
+      // 如果当前URL和目标URL不同，执行重定向
+      if (window.location.href !== targetUrl) {
+        log('执行重定向...');
+        setTimeout(() => {
+          window.location.replace(targetUrl);
+        }, 1000); // 延迟1秒让用户看到调试信息
+      } else {
+        log('URL已正确，无需重定向');
+      }
+    })();
+  </script>
+</body>
 </html> 
