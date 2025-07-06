@@ -22,7 +22,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
+    // 使用相对路径，避免跳转到根目录
+    navigate('/admin/login', { replace: true });
   };
 
   // 计算通知数据

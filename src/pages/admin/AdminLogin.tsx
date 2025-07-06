@@ -22,7 +22,8 @@ const AdminLogin: React.FC = () => {
     try {
       const success = await login(username, password);
       if (success) {
-        navigate('/admin/dashboard');
+        // 使用相对路径，避免跳转到根目录
+        navigate('/admin/dashboard', { replace: true });
       } else {
         setError('用户名或密码错误');
       }
