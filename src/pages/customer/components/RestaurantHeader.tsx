@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChefHat, Sparkles, Bell, ChevronDown, ChevronUp, Settings } from 'lucide-react';
+import { ChefHat, Sparkles, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import Announcement, { defaultAnnouncementData, AnnouncementData } from './Announcement';
 import { loadDataFromStorage } from '../../../utils/storage';
 
@@ -105,18 +105,7 @@ const RestaurantHeader: React.FC<RestaurantHeaderProps> = ({
     }
   };
 
-  // 处理管理员入口点击
-  const handleAdminClick = () => {
-    // 使用URL参数的方式显示管理员登录
-    const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('admin', 'login');
-    const newUrl = currentUrl.toString();
-    console.log('🔧 管理员按钮点击:', {
-      from: window.location.href,
-      to: newUrl
-    });
-    window.location.href = newUrl;
-  };
+
 
   return (
     <header ref={headerRef} className="sticky top-0 z-30 w-full">
@@ -170,17 +159,8 @@ const RestaurantHeader: React.FC<RestaurantHeaderProps> = ({
             </div>
           </div>
 
-          {/* 右侧：公告按钮和管理员入口 */}
+          {/* 右侧：公告按钮 */}
           <div className="flex items-center space-x-3">
-            {/* 管理员入口按钮 */}
-            <button
-              onClick={handleAdminClick}
-              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full px-3 py-2 transition-all duration-300 border border-white/20"
-            >
-              <Settings className="h-4 w-4 text-white" />
-              <span className="text-white font-medium text-xs hidden sm:block">管理</span>
-            </button>
-
             {/* 公告按钮 */}
             {!hideAnnouncement && announcementData.isEnabled && (
               <button

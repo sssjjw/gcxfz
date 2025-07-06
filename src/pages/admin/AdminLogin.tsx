@@ -131,9 +131,6 @@ const AdminLogin: React.FC = () => {
               <p className="text-gray-700 font-medium mb-2">可用管理员账户：</p>
               <div className="space-y-1 text-xs">
                 <p className="text-gray-600">
-                  账户: <span className="font-semibold text-orange-600">admin</span> | 密码: <span className="font-semibold">password</span>
-                </p>
-                <p className="text-gray-600">
                   账户: <span className="font-semibold text-orange-600">sjw</span> | 密码: <span className="font-semibold">123456</span>
                 </p>
                 <p className="text-gray-600">

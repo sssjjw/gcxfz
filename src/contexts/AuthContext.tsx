@@ -15,11 +15,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      // 管理员账户列表
+      // 管理员账户列表 - 只保留sjw和xsm
       const adminAccounts = [
-        { id: '1', username: 'admin', password: 'password' },
-        { id: '2', username: 'sjw', password: '123456' },
-        { id: '3', username: 'xsm', password: '123456' }
+        { id: '1', username: 'sjw', password: '123456' },
+        { id: '2', username: 'xsm', password: '123456' }
       ];
 
       // 查找匹配的账户
