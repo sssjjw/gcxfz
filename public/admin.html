@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>哥村小饭桌 - 管理员登录</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       margin: 0;
       padding: 0;
@@ -16,121 +20,398 @@
       align-items: center;
     }
     
-    .container {
+    .login-container {
       background: white;
-      padding: 30px;
+      padding: 40px;
       border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      text-align: center;
       max-width: 400px;
       width: 90%;
     }
     
     .logo {
-      font-size: 2.5em;
-      margin-bottom: 15px;
+      text-align: center;
+      font-size: 3em;
+      margin-bottom: 20px;
     }
     
     .title {
-      font-size: 1.5em;
+      text-align: center;
+      font-size: 1.8em;
       font-weight: bold;
       color: #333;
       margin-bottom: 10px;
     }
     
     .subtitle {
+      text-align: center;
       color: #666;
       font-size: 0.9em;
+      margin-bottom: 30px;
+    }
+    
+    .form-group {
       margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #374151;
+      font-size: 0.9em;
+    }
+    
+    .form-input-wrapper {
+      position: relative;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px 12px 12px 45px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: white;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #f97316;
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+    }
+    
+    .form-input:disabled {
+      background: #f9fafb;
+      color: #6b7280;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      width: 18px;
+      height: 18px;
+    }
+    
+    .login-button {
+      width: 100%;
+      padding: 12px;
+      background: #f97316;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .login-button:hover:not(:disabled) {
+      background: #ea580c;
+    }
+    
+    .login-button:disabled {
+      background: #fdba74;
+      cursor: not-allowed;
+    }
+    
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .info-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .info-box p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.85em;
     }
     
     .debug-info {
       margin-top: 20px;
-      padding: 10px;
-      background: #f8f9fa;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
       font-size: 0.8em;
-      color: #666;
-      text-align: left;
+      color: #64748b;
+      display: none;
     }
     
-    .loading-bar {
-      width: 100%;
-      height: 4px;
-      background: #f0f0f0;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    
-    .loading-progress {
-      height: 100%;
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      border-radius: 2px;
-      animation: loading 1.5s ease-in-out;
-    }
-    
-    @keyframes loading {
-      0% { width: 0%; }
-      100% { width: 100%; }
+    .show-debug .debug-info {
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="login-container">
     <div class="logo">🍚</div>
     <h1 class="title">哥村小饭桌</h1>
-    <p class="subtitle">正在跳转到管理员登录...</p>
-    <div class="loading-bar">
-      <div class="loading-progress"></div>
+    <p class="subtitle">管理员后台登录</p>
+    
+    <form id="loginForm">
+      <div id="errorMessage" class="error-message" style="display: none;">
+        <svg viewBox="0 0 20 20" fill="currentColor" style="width: 16px; height: 16px;">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <span id="errorText"></span>
+      </div>
+      
+      <div class="form-group">
+        <label for="username" class="form-label">用户名</label>
+        <div class="form-input-wrapper">
+          <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="form-input"
+            placeholder="请输入用户名"
+            required
+            autocomplete="username"
+          />
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="form-label">密码</label>
+        <div class="form-input-wrapper">
+          <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="请输入密码"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+      </div>
+      
+      <button type="submit" id="loginButton" class="login-button">
+        <span id="loginText">登录</span>
+      </button>
+    </form>
+    
+    <div class="info-box">
+      <p>请使用您的管理员账户登录系统</p>
     </div>
-    <div class="debug-info" id="debug-info">
-      <div>当前URL: <span id="current-url"></span></div>
-      <div>目标URL: <span id="target-url"></span></div>
-      <div>状态: <span id="status">准备跳转...</span></div>
+    
+    <div class="debug-info" id="debugInfo">
+      <div><strong>调试信息:</strong></div>
+      <div>当前时间: <span id="currentTime"></span></div>
+      <div>页面URL: <span id="pageUrl"></span></div>
+      <div>登录状态: <span id="loginStatus">未登录</span></div>
     </div>
   </div>
 
   <script>
-    console.log('📋 管理员页面开始初始化');
+    console.log('📋 管理员登录页面初始化');
     
-    // 更新调试信息
+    // 管理员账户配置
+    const ADMIN_ACCOUNTS = {
+      'sjw': '123456',
+      'xsm': '123456',
+      'admin': 'password'
+    };
+    
+    // DOM元素
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginButton = document.getElementById('loginButton');
+    const loginText = document.getElementById('loginText');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    const debugInfo = document.getElementById('debugInfo');
+    
+    // 初始化调试信息
     const updateDebugInfo = () => {
-      document.getElementById('current-url').textContent = window.location.href;
-      const targetUrl = window.location.origin + '/?admin=login';
-      document.getElementById('target-url').textContent = targetUrl;
+      document.getElementById('currentTime').textContent = new Date().toLocaleString('zh-CN');
+      document.getElementById('pageUrl').textContent = window.location.href;
     };
     
-    updateDebugInfo();
+    // 显示错误信息
+    const showError = (message) => {
+      errorText.textContent = message;
+      errorMessage.style.display = 'flex';
+    };
     
-    // 确保立即跳转
-    const redirectToLogin = () => {
-      const targetUrl = window.location.origin + '/?admin=login';
-      console.log('📋 正在跳转到:', targetUrl);
-      document.getElementById('status').textContent = '正在跳转...';
+    // 隐藏错误信息
+    const hideError = () => {
+      errorMessage.style.display = 'none';
+    };
+    
+    // 设置加载状态
+    const setLoading = (loading) => {
+      loginButton.disabled = loading;
+      usernameInput.disabled = loading;
+      passwordInput.disabled = loading;
       
-      // 强制跳转，清除所有可能的缓存
-      window.location.replace(targetUrl);
+      if (loading) {
+        loginText.innerHTML = '<div class="spinner"></div>正在登录...';
+      } else {
+        loginText.textContent = '登录';
+      }
     };
     
-    // 立即执行跳转
-    setTimeout(redirectToLogin, 200);
+    // 验证用户登录
+    const validateLogin = (username, password) => {
+      return ADMIN_ACCOUNTS[username] === password;
+    };
     
-    // 备用跳转逻辑
-    setTimeout(() => {
-      if (window.location.href.indexOf('admin=login') === -1) {
-        console.log('📋 备用跳转执行');
-        document.getElementById('status').textContent = '备用跳转执行...';
-        window.location.href = window.location.origin + '/?admin=login';
+    // 执行登录
+    const performLogin = async (username, password) => {
+      console.log('🔐 开始登录验证:', { username });
+      
+      try {
+        // 模拟网络延迟
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        if (validateLogin(username, password)) {
+          console.log('✅ 登录成功');
+          document.getElementById('loginStatus').textContent = '登录成功';
+          
+          // 保存登录状态
+          sessionStorage.setItem('adminAuth', JSON.stringify({
+            username: username,
+            loginTime: Date.now(),
+            isAuthenticated: true
+          }));
+          
+          // 跳转到管理后台
+          console.log('🎯 跳转到管理后台');
+          window.location.href = '/?admin=dashboard';
+          
+          return true;
+        } else {
+          console.log('❌ 登录失败');
+          document.getElementById('loginStatus').textContent = '登录失败';
+          showError('用户名或密码错误');
+          return false;
+        }
+      } catch (error) {
+        console.error('❌ 登录错误:', error);
+        document.getElementById('loginStatus').textContent = '登录错误';
+        showError('登录失败，请稍后再试');
+        return false;
       }
-    }, 1000);
+    };
     
-    // 如果还是没跳转，显示手动链接
-    setTimeout(() => {
-      if (window.location.href.indexOf('admin=login') === -1) {
-        console.log('📋 自动跳转失败，显示手动链接');
-        document.getElementById('status').innerHTML = '自动跳转失败，<a href="/?admin=login" style="color: #667eea;">点击这里手动跳转</a>';
+    // 表单提交处理
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (loginButton.disabled) return;
+      
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      
+      // 基本验证
+      if (!username || !password) {
+        showError('请输入用户名和密码');
+        return;
       }
-    }, 3000);
+      
+      hideError();
+      setLoading(true);
+      
+      const success = await performLogin(username, password);
+      
+      if (!success) {
+        setLoading(false);
+      }
+    });
+    
+    // 输入时隐藏错误信息
+    [usernameInput, passwordInput].forEach(input => {
+      input.addEventListener('input', hideError);
+    });
+    
+    // 检查是否已经登录
+    const checkExistingAuth = () => {
+      try {
+        const authData = sessionStorage.getItem('adminAuth');
+        if (authData) {
+          const auth = JSON.parse(authData);
+          if (auth.isAuthenticated) {
+            console.log('👤 检测到已登录状态，跳转到后台');
+            window.location.href = '/?admin=dashboard';
+            return;
+          }
+        }
+      } catch (error) {
+        console.log('检查登录状态出错:', error);
+      }
+    };
+    
+    // 初始化
+    updateDebugInfo();
+    checkExistingAuth();
+    
+    // 键盘快捷键：双击Shift显示调试信息
+    let shiftCount = 0;
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Shift') {
+        shiftCount++;
+        if (shiftCount === 2) {
+          document.body.classList.toggle('show-debug');
+          updateDebugInfo();
+          console.log('🔧 调试模式切换');
+        }
+        setTimeout(() => shiftCount = 0, 500);
+      }
+    });
+    
+    // 每秒更新调试信息
+    setInterval(updateDebugInfo, 1000);
+    
+    console.log('🎯 管理员登录页面已准备就绪');
+    console.log('💡 提示: 双击Shift键可显示调试信息');
+    console.log('👥 可用账户: sjw/123456, xsm/123456, admin/password');
   </script>
 </body>
 </html> 
