@@ -44,6 +44,16 @@
       margin-bottom: 20px;
     }
     
+    .debug-info {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-size: 0.8em;
+      color: #666;
+      text-align: left;
+    }
+    
     .loading-bar {
       width: 100%;
       height: 4px;
@@ -56,7 +66,7 @@
       height: 100%;
       background: linear-gradient(90deg, #667eea, #764ba2);
       border-radius: 2px;
-      animation: loading 0.8s ease-in-out;
+      animation: loading 1.5s ease-in-out;
     }
     
     @keyframes loading {
@@ -69,25 +79,58 @@
   <div class="container">
     <div class="logo">🍚</div>
     <h1 class="title">哥村小饭桌</h1>
-    <p class="subtitle">管理员后台</p>
+    <p class="subtitle">正在跳转到管理员登录...</p>
     <div class="loading-bar">
       <div class="loading-progress"></div>
+    </div>
+    <div class="debug-info" id="debug-info">
+      <div>当前URL: <span id="current-url"></span></div>
+      <div>目标URL: <span id="target-url"></span></div>
+      <div>状态: <span id="status">准备跳转...</span></div>
     </div>
   </div>
 
   <script>
-    // 立即跳转到管理员登录界面
-    console.log('📋 管理员页面 - 立即跳转到登录界面');
+    console.log('📋 管理员页面开始初始化');
     
-    // 立即跳转，不等待任何延迟
-    window.location.replace('/?admin=login');
+    // 更新调试信息
+    const updateDebugInfo = () => {
+      document.getElementById('current-url').textContent = window.location.href;
+      const targetUrl = window.location.origin + '/?admin=login';
+      document.getElementById('target-url').textContent = targetUrl;
+    };
     
-    // 如果上面的跳转失败，备用跳转
+    updateDebugInfo();
+    
+    // 确保立即跳转
+    const redirectToLogin = () => {
+      const targetUrl = window.location.origin + '/?admin=login';
+      console.log('📋 正在跳转到:', targetUrl);
+      document.getElementById('status').textContent = '正在跳转...';
+      
+      // 强制跳转，清除所有可能的缓存
+      window.location.replace(targetUrl);
+    };
+    
+    // 立即执行跳转
+    setTimeout(redirectToLogin, 200);
+    
+    // 备用跳转逻辑
     setTimeout(() => {
       if (window.location.href.indexOf('admin=login') === -1) {
-        window.location.href = '/?admin=login';
+        console.log('📋 备用跳转执行');
+        document.getElementById('status').textContent = '备用跳转执行...';
+        window.location.href = window.location.origin + '/?admin=login';
       }
-    }, 100);
+    }, 1000);
+    
+    // 如果还是没跳转，显示手动链接
+    setTimeout(() => {
+      if (window.location.href.indexOf('admin=login') === -1) {
+        console.log('📋 自动跳转失败，显示手动链接');
+        document.getElementById('status').innerHTML = '自动跳转失败，<a href="/?admin=login" style="color: #667eea;">点击这里手动跳转</a>';
+      }
+    }, 3000);
   </script>
 </body>
 </html> 
