@@ -44,6 +44,13 @@ jobs:
         VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
         VITE_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+    
+    - name: 复制public目录文件到dist
+      run: |
+        cp public/admin.html dist/admin.html
+        cp public/404.html dist/404.html
+        cp public/test-admin-routing.html dist/test-admin-routing.html
+        cp public/firebase-test.html dist/firebase-test.html
         
     - name: 部署到GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
